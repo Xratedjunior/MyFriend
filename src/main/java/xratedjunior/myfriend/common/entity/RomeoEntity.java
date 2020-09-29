@@ -8,7 +8,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 
-public class RomeoEntity extends FriendEntity
+public class RomeoEntity extends DefaultFriendEntity
 {
 	public RomeoEntity(EntityType<? extends RomeoEntity> type, World worldIn) {
 		super(type, worldIn);

@@ -43,8 +43,8 @@ import xratedjunior.myfriend.common.entity.ai.goal.FriendHurtByTargetGoal;
 import xratedjunior.myfriend.common.entity.ai.goal.FriendHurtTargetGoal;
 import xratedjunior.myfriend.common.entity.ai.goal.WaitForFriendGoal;
 
-public abstract class FriendEntity extends FriendEntityAbstract implements IAngerable {
-	   private static final DataParameter<Integer> field_234232_bz_ = EntityDataManager.createKey(FriendEntity.class, DataSerializers.VARINT);
+public abstract class FriendEntity2 extends FriendEntityAbstract implements IAngerable {
+	   private static final DataParameter<Integer> field_234232_bz_ = EntityDataManager.createKey(FriendEntity2.class, DataSerializers.VARINT);
 
 	   private boolean isWet;
 	   private boolean isShaking;
@@ -53,7 +53,7 @@ public abstract class FriendEntity extends FriendEntityAbstract implements IAnge
 	   private static final RangedInteger field_234230_bG_ = TickRangeConverter.func_233037_a_(20, 39);
 	   private UUID field_234231_bH_;
 
-	   public FriendEntity(EntityType<? extends FriendEntity> type, World worldIn) {
+	   public FriendEntity2(EntityType<? extends FriendEntity2> type, World worldIn) {
 	      super(type, worldIn);
 	      this.setTamed(false);
 	   }

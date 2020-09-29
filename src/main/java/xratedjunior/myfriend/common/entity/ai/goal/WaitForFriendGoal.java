@@ -4,15 +4,16 @@ import java.util.EnumSet;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.StringTextComponent;
 import xratedjunior.myfriend.common.entity.FriendEntityAbstract;
 
 public class WaitForFriendGoal extends Goal {
-   private final FriendEntityAbstract tameable;
+   private final FriendEntityAbstract friendEntity;
 
-   public WaitForFriendGoal(FriendEntityAbstract entityIn) {
-      this.tameable = entityIn;
+   public WaitForFriendGoal(FriendEntityAbstract friendEntity) {
+      this.friendEntity = friendEntity;
       this.setMutexFlags(EnumSet.of(Goal.Flag.JUMP, Goal.Flag.MOVE));
    }
 
@@ -20,7 +21,7 @@ public class WaitForFriendGoal extends Goal {
     * Returns whether an in-progress EntityAIBase should continue executing
     */
    public boolean shouldContinueExecuting() {
-      return this.tameable.func_233685_eM_();
+      return this.friendEntity.func_233685_eM_();
    }
 
    /**
@@ -28,18 +29,18 @@ public class WaitForFriendGoal extends Goal {
     * method as well.
     */
    public boolean shouldExecute() {
-      if (!this.tameable.isTamed()) {
+      if (!this.friendEntity.isTamed()) {
          return false;
-      } else if (this.tameable.isInWaterOrBubbleColumn()) {
+      } else if (this.friendEntity.isInWaterOrBubbleColumn()) {
          return false;
-      } else if (!this.tameable.func_233570_aj_()) {
+      } else if (!this.friendEntity.func_233570_aj_()) {
          return false;
       } else {
-         LivingEntity livingentity = this.tameable.getOwner();
+         LivingEntity livingentity = this.friendEntity.getOwner();
          if (livingentity == null) {
             return true;
          } else {
-            return this.tameable.getDistanceSq(livingentity) < 144.0D && livingentity.getRevengeTarget() != null ? false : this.tameable.func_233685_eM_();
+            return this.friendEntity.getDistanceSq(livingentity) < 144.0D && livingentity.getRevengeTarget() != null ? false : this.friendEntity.func_233685_eM_();
          }
       }
    }
@@ -48,16 +49,20 @@ public class WaitForFriendGoal extends Goal {
     * Execute a one shot task or start executing a continuous task
     */
    public void startExecuting() {
-      this.tameable.getNavigator().clearPath();
-      this.tameable.func_233686_v_(true);
-      this.tameable.getOwner().sendMessage(new StringTextComponent(this.tameable.getName().getString() + ": I'll wait here."), Util.field_240973_b_);
+      this.friendEntity.getNavigator().clearPath();
+      this.friendEntity.func_233686_v_(true);
+      if(!this.friendEntity.world.isRemote && this.friendEntity.getOwner() instanceof ServerPlayerEntity) {
+          this.friendEntity.getOwner().sendMessage(new StringTextComponent(this.friendEntity.getName().getString() + ": I will wait here."), Util.field_240973_b_);
+      }
    }
 
    /**
     * Reset the task's internal state. Called when this task is interrupted by another one
     */
    public void resetTask() {
-      this.tameable.func_233686_v_(false);
-      this.tameable.getOwner().sendMessage(new StringTextComponent(this.tameable.getName().getString() + ": Okay let's go!"), Util.field_240973_b_);
+      this.friendEntity.func_233686_v_(false);
+      if(!this.friendEntity.world.isRemote && this.friendEntity.getOwner() instanceof ServerPlayerEntity) {
+    	  this.friendEntity.getOwner().sendMessage(new StringTextComponent(this.friendEntity.getName().getString() + ": Okay let's go!"), Util.field_240973_b_);
+      }
    }
 }

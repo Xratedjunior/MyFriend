@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -25,7 +26,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-public abstract class FriendEntityAbstract extends DefaultEntity
+public abstract class FriendEntityAbstract extends CreatureEntity
 {
 	protected static final DataParameter<Byte> TAMED = EntityDataManager.createKey(FriendEntityAbstract.class, DataSerializers.BYTE);
 	protected static final DataParameter<Optional<UUID>> OWNER_UNIQUE_ID = EntityDataManager.createKey(FriendEntityAbstract.class, DataSerializers.OPTIONAL_UNIQUE_ID);
@@ -47,7 +48,6 @@ public abstract class FriendEntityAbstract extends DefaultEntity
 	   if (this.getOwnerId() != null) {
 	      compound.putUniqueId("Owner", this.getOwnerId());
 	   }
-	
 	   compound.putBoolean("Sitting", this.field_233683_bw_);
 	}
 	
@@ -90,7 +90,7 @@ public abstract class FriendEntityAbstract extends DefaultEntity
 	   if (!play) {
 	      iparticledata = ParticleTypes.SMOKE;
 	   }
-	
+	   
 	   for(int i = 0; i < 7; ++i) {
 	      double d0 = this.rand.nextGaussian() * 0.02D;
 	      double d1 = this.rand.nextGaussian() * 0.02D;
@@ -194,7 +194,6 @@ public abstract class FriendEntityAbstract extends DefaultEntity
 	         return livingentity.getTeam();
 	      }
 	   }
-	
 	   return super.getTeam();
 	}
 	

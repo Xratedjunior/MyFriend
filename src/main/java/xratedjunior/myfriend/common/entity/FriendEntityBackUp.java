@@ -9,15 +9,13 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.IAngerable;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.ai.goal.HurtByTargetGoal;
 import net.minecraft.entity.ai.goal.LookAtGoal;
 import net.minecraft.entity.ai.goal.LookRandomlyGoal;
-import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
-import net.minecraft.entity.ai.goal.ResetAngerGoal;
 import net.minecraft.entity.ai.goal.SwimGoal;
 import net.minecraft.entity.ai.goal.WaterAvoidingRandomWalkingGoal;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
+import net.minecraft.item.DyeColor;
 import net.minecraft.item.DyeItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -43,8 +41,10 @@ import xratedjunior.myfriend.common.entity.ai.goal.FriendHurtByTargetGoal;
 import xratedjunior.myfriend.common.entity.ai.goal.FriendHurtTargetGoal;
 import xratedjunior.myfriend.common.entity.ai.goal.WaitForFriendGoal;
 
-public abstract class FriendEntity extends FriendEntityAbstract implements IAngerable {
-	   private static final DataParameter<Integer> field_234232_bz_ = EntityDataManager.createKey(FriendEntity.class, DataSerializers.VARINT);
+public abstract class FriendEntityBackUp extends FriendEntityAbstract implements IAngerable {
+	private static final DataParameter<Boolean> BEGGING = EntityDataManager.createKey(FriendEntityBackUp.class, DataSerializers.BOOLEAN);
+	   private static final DataParameter<Integer> COLLAR_COLOR = EntityDataManager.createKey(FriendEntityBackUp.class, DataSerializers.VARINT);
+	   private static final DataParameter<Integer> field_234232_bz_ = EntityDataManager.createKey(FriendEntityBackUp.class, DataSerializers.VARINT);
 
 	   private boolean isWet;
 	   private boolean isShaking;
@@ -53,7 +53,7 @@ public abstract class FriendEntity extends FriendEntityAbstract implements IAnge
 	   private static final RangedInteger field_234230_bG_ = TickRangeConverter.func_233037_a_(20, 39);
 	   private UUID field_234231_bH_;
 
-	   public FriendEntity(EntityType<? extends FriendEntity> type, World worldIn) {
+	   public FriendEntityBackUp(EntityType<? extends FriendEntityBackUp> type, World worldIn) {
 	      super(type, worldIn);
 	      this.setTamed(false);
 	   }
@@ -64,17 +64,16 @@ public abstract class FriendEntity extends FriendEntityAbstract implements IAnge
 	      this.goalSelector.addGoal(3, new FollowFriendGoal(this, 1.2D, 8.0F, 1.5F, false));
 	      this.goalSelector.addGoal(4, new LookAtGoal(this, PlayerEntity.class, 4.0F));
 	      this.goalSelector.addGoal(5, new WaterAvoidingRandomWalkingGoal(this, 1.0D));
-	      this.goalSelector.addGoal(6, new LookAtGoal(this, PlayerEntity.class, 8.0F));
-	      this.goalSelector.addGoal(6, new LookRandomlyGoal(this));
+	      this.goalSelector.addGoal(11, new LookAtGoal(this, PlayerEntity.class, 8.0F));
+	      this.goalSelector.addGoal(11, new LookRandomlyGoal(this));
 	      this.targetSelector.addGoal(1, new FriendHurtByTargetGoal(this));
 	      this.targetSelector.addGoal(2, new FriendHurtTargetGoal(this));
-	      this.targetSelector.addGoal(3, (new HurtByTargetGoal(this)).setCallsForHelp());
-	      this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, PlayerEntity.class, 10, true, false, this::func_233680_b_));
-	      this.targetSelector.addGoal(5, new ResetAngerGoal<>(this, true));
 	   }
 
 	   protected void registerData() {
 	      super.registerData();
+	      this.dataManager.register(BEGGING, false);
+	      this.dataManager.register(COLLAR_COLOR, DyeColor.RED.getId());
 	      this.dataManager.register(field_234232_bz_, 0);
 	   }
 
@@ -241,6 +240,15 @@ public abstract class FriendEntity extends FriendEntityAbstract implements IAnge
 	               return actionresulttype;
 	            }
 
+	            DyeColor dyecolor = ((DyeItem)item).getDyeColor();
+	            if (dyecolor != this.getCollarColor()) {
+	               this.setCollarColor(dyecolor);
+	               if (!player.abilities.isCreativeMode) {
+	                  itemstack.shrink(1);
+	               }
+
+	               return ActionResultType.SUCCESS;
+	            }
 	         } else if (item == Items.COOKIE && !this.func_233678_J__()) {
 	            if (!player.abilities.isCreativeMode) {
 	               itemstack.shrink(1);
@@ -309,4 +317,25 @@ public abstract class FriendEntity extends FriendEntityAbstract implements IAnge
 	   public void func_230259_a_(@Nullable UUID p_230259_1_) {
 	      this.field_234231_bH_ = p_230259_1_;
 	   }
+
+	   public DyeColor getCollarColor() {
+	      return DyeColor.byId(this.dataManager.get(COLLAR_COLOR));
+	   }
+
+	   public void setCollarColor(DyeColor collarcolor) {
+	      this.dataManager.set(COLLAR_COLOR, collarcolor.getId());
+	   }
+
+	   /*
+	   public FriendEntityBackUp func_241840_a(ServerWorld p_241840_1_, AgeableEntity p_241840_2_) {
+	      RomeoEntity entity = MFEntityTypes.ROMEO.create(p_241840_1_);
+	      UUID uuid = this.getOwnerId();
+	      if (uuid != null) {
+	    	  entity.setOwnerId(uuid);
+	    	  entity.setTamed(true);
+	      }
+
+	      return entity;
+	   }
+	   */
 }

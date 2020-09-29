@@ -7,7 +7,6 @@ import javax.annotation.Nullable;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.CreatureAttribute;
-import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.EntityType;
@@ -19,13 +18,7 @@ import net.minecraft.entity.Pose;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.ai.goal.LookAtGoal;
-import net.minecraft.entity.ai.goal.LookRandomlyGoal;
 import net.minecraft.entity.ai.goal.MeleeAttackGoal;
-import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
-import net.minecraft.entity.ai.goal.SwimGoal;
-import net.minecraft.entity.ai.goal.WaterAvoidingRandomWalkingGoal;
-import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.entity.projectile.ProjectileHelper;
@@ -41,14 +34,16 @@ import net.minecraft.world.World;
 import xratedjunior.myfriend.common.entity.ai.attribute.MFCreatureAttribute;
 import xratedjunior.myfriend.common.entity.ai.goal.PassiveRangedBowAttackGoal;
 
-public abstract class DefaultEntity extends CreatureEntity implements IRangedAttackMob
+public abstract class DefaultFriendEntity2 extends FriendEntity implements IRangedAttackMob
 {	
+	/*********************************************************** Default Entity ********************************************************/
+
 	//@SuppressWarnings("unused")
 	//Check MobEntity for more features
 	//private final NonNullList<ItemStack> inventorySlots = NonNullList.withSize(4, ItemStack.EMPTY);
 	//protected final float[] inventorySlotsDropChances = new float[4];
 
-	private final PassiveRangedBowAttackGoal<DefaultEntity> bowGoal = new PassiveRangedBowAttackGoal<>(this, 1.0D, 20, 15.0F);
+	private final PassiveRangedBowAttackGoal<DefaultFriendEntity2> bowGoal = new PassiveRangedBowAttackGoal<>(this, 1.0D, 20, 15.0F);
 	private final MeleeAttackGoal meleeGoal = new MeleeAttackGoal(this, 1.2D, false) {
 		
 		/**
@@ -56,7 +51,7 @@ public abstract class DefaultEntity extends CreatureEntity implements IRangedAtt
 		*/
 		public void resetTask() {
 			super.resetTask();
-			DefaultEntity.this.setAggroed(false);
+			DefaultFriendEntity2.this.setAggroed(false);
 		}
 	
 		/**
@@ -64,11 +59,11 @@ public abstract class DefaultEntity extends CreatureEntity implements IRangedAtt
 		*/
 		public void startExecuting() {
 			super.startExecuting();
-			DefaultEntity.this.setAggroed(true);
+			DefaultFriendEntity2.this.setAggroed(true);
 		}
 	};
 
-	public DefaultEntity(EntityType<? extends DefaultEntity> type, World worldIn) {
+	public DefaultFriendEntity2(EntityType<? extends DefaultFriendEntity2> type, World worldIn) {
 		super(type, worldIn);
 		this.setCombatTask();
 		this.experienceValue = 5;
@@ -82,25 +77,15 @@ public abstract class DefaultEntity extends CreatureEntity implements IRangedAtt
 		this.updateArmSwingProgress();
 		super.livingTick();
 	}
-	   
-	protected void registerGoals() {
-      this.goalSelector.addGoal(1, new SwimGoal(this));
-      this.goalSelector.addGoal(4, new LookAtGoal(this, PlayerEntity.class, 4.0F));
-      this.goalSelector.addGoal(5, new WaterAvoidingRandomWalkingGoal(this, 1.0D));
-      this.goalSelector.addGoal(11, new LookAtGoal(this, PlayerEntity.class, 8.0F));
-      this.goalSelector.addGoal(11, new LookRandomlyGoal(this));
-      this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, PlayerEntity.class, true));
-      this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, PigEntity.class, true));
-   }
 
-   public static AttributeModifierMap.MutableAttribute abstractFriendAttributes() {
-      return MobEntity.func_233666_p_().func_233815_a_(Attributes.field_233821_d_, (double)0.3F).func_233815_a_(Attributes.field_233818_a_, 20.0D).func_233815_a_(Attributes.field_233823_f_, 4.0D);
-   }
+	public static AttributeModifierMap.MutableAttribute abstractFriendAttributes() {
+	   return MobEntity.func_233666_p_().func_233815_a_(Attributes.field_233821_d_, (double)0.3F).func_233815_a_(Attributes.field_233818_a_, 20.0D).func_233815_a_(Attributes.field_233823_f_, 4.0D);
+	}
    
-   @Override
-   public boolean canBeLeashedTo(PlayerEntity player) {
+	@Override
+	public boolean canBeLeashedTo(PlayerEntity player) {
 	   return false;
-   }
+	}
    
    @Nullable
    public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, @Nullable ILivingEntityData spawnDataIn, @Nullable CompoundNBT dataTag) {
@@ -179,6 +164,7 @@ public abstract class DefaultEntity extends CreatureEntity implements IRangedAtt
 		super.readAdditional(compound);
 		this.setCombatTask();
 	}
+	
 
 	public void setItemStackToSlot(EquipmentSlotType slotIn, ItemStack stack) {
 		super.setItemStackToSlot(slotIn, stack);
@@ -206,6 +192,8 @@ public abstract class DefaultEntity extends CreatureEntity implements IRangedAtt
 	* Returns whether this Entity is on the same team as the given Entity.
 	*/
 	public boolean isOnSameTeam(Entity entityIn) {
+		
+		//Default
 		if (super.isOnSameTeam(entityIn)) {
 			return true;
 		} else if (entityIn instanceof LivingEntity && ((LivingEntity)entityIn).getCreatureAttribute() == MFCreatureAttribute.ROMEO) {
@@ -213,5 +201,9 @@ public abstract class DefaultEntity extends CreatureEntity implements IRangedAtt
 		} else {
 			return false;
 		}
+		
 	}
+	
+	/*********************************************************** Tame Entity ********************************************************/
+
 }
