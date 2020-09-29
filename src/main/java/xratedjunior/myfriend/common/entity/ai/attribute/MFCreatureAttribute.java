@@ -4,6 +4,6 @@ import net.minecraft.entity.CreatureAttribute;
 
 public class MFCreatureAttribute 
 {
-	public static final CreatureAttribute ROMEO = new CreatureAttribute();
+	public static final CreatureAttribute FRIEND = new CreatureAttribute();
 
 }
