@@ -1,8 +1,5 @@
 package xratedjunior.myfriend.common.entity;
 
-import java.util.List;
-import java.util.Optional;
-
 import javax.annotation.Nullable;
 
 import com.mojang.serialization.DataResult;
@@ -13,7 +10,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ILivingEntityData;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.brain.memory.MemoryModuleType;
 import net.minecraft.entity.item.ExperienceOrbEntity;
@@ -43,7 +39,6 @@ import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.ActionResultType;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
@@ -364,7 +359,7 @@ public abstract class TradeableFriendEntity extends TradeableEntity implements I
       if (this.isSleeping()) {
          return null;
       } else {
-         return this.hasCustomer() ? SoundEvents.ENTITY_VILLAGER_TRADE : SoundEvents.ENTITY_VILLAGER_AMBIENT;
+         return this.hasCustomer() ? SoundEvents.ENTITY_VILLAGER_TRADE : null;
       }
    }
 
@@ -395,47 +390,6 @@ public abstract class TradeableFriendEntity extends TradeableEntity implements I
          this.world.addEntity(new ExperienceOrbEntity(this.world, this.getPosX(), this.getPosY() + 0.5D, this.getPosZ(), i));
       }
 
-   }
-
-   /**
-    * Hint to AI tasks that we were attacked by the passed EntityLivingBase and should retaliate. Is not guaranteed to
-    * change our actual active target (for example if we are currently busy attacking someone else)
-    */
-   public void setRevengeTarget(@Nullable LivingEntity livingBase) {
-      if (livingBase != null && this.world instanceof ServerWorld) {
-         ((ServerWorld)this.world).updateReputation(IReputationType.VILLAGER_HURT, livingBase, this);
-         if (this.isAlive() && livingBase instanceof PlayerEntity) {
-            this.world.setEntityState(this, (byte)13);
-         }
-      }
-
-      super.setRevengeTarget(livingBase);
-   }
-
-   /**
-    * Called when the mob's health reaches 0.
-    */
-   public void onDeath(DamageSource cause) {
-      LOGGER.info("Villager {} died, message: '{}'", this, cause.getDeathMessage(this).getString());
-      Entity entity = cause.getTrueSource();
-      if (entity != null) {
-         this.func_223361_a(entity);
-      }
-      super.onDeath(cause);
-   }
-
-   private void func_223361_a(Entity p_223361_1_) {
-      if (this.world instanceof ServerWorld) {
-         Optional<List<LivingEntity>> optional = this.brain.getMemory(MemoryModuleType.VISIBLE_MOBS);
-         if (optional.isPresent()) {
-            ServerWorld serverworld = (ServerWorld)this.world;
-            optional.get().stream().filter((p_223349_0_) -> {
-               return p_223349_0_ instanceof IReputationTracking;
-            }).forEach((p_223342_2_) -> {
-               serverworld.updateReputation(IReputationType.VILLAGER_KILLED, p_223361_1_, (IReputationTracking)p_223342_2_);
-            });
-         }
-      }
    }
 
    public int getPlayerReputation(PlayerEntity player) {
