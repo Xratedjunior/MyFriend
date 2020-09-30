@@ -26,13 +26,13 @@ import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-public abstract class FriendEntityAbstract extends CreatureEntity
+public abstract class TameableFriendEntity extends CreatureEntity
 {
-	protected static final DataParameter<Byte> TAMED = EntityDataManager.createKey(FriendEntityAbstract.class, DataSerializers.BYTE);
-	protected static final DataParameter<Optional<UUID>> OWNER_UNIQUE_ID = EntityDataManager.createKey(FriendEntityAbstract.class, DataSerializers.OPTIONAL_UNIQUE_ID);
+	protected static final DataParameter<Byte> TAMED = EntityDataManager.createKey(TameableFriendEntity.class, DataSerializers.BYTE);
+	protected static final DataParameter<Optional<UUID>> OWNER_UNIQUE_ID = EntityDataManager.createKey(TameableFriendEntity.class, DataSerializers.OPTIONAL_UNIQUE_ID);
 	private boolean field_233683_bw_;
 	
-	protected FriendEntityAbstract(EntityType<? extends FriendEntityAbstract> type, World worldIn) {
+	protected TameableFriendEntity(EntityType<? extends TameableFriendEntity> type, World worldIn) {
 	   super(type, worldIn);
 	   this.setupTamedAI();
 	}
@@ -211,7 +211,6 @@ public abstract class FriendEntityAbstract extends CreatureEntity
 	         return livingentity.isOnSameTeam(entityIn);
 	      }
 	   }
-	
 	   return super.isOnSameTeam(entityIn);
 	}
 	

@@ -7,12 +7,12 @@ import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.StringTextComponent;
-import xratedjunior.myfriend.common.entity.FriendEntityAbstract;
+import xratedjunior.myfriend.common.entity.TameableFriendEntity;
 
 public class WaitForFriendGoal extends Goal {
-   private final FriendEntityAbstract friendEntity;
+   private final TameableFriendEntity friendEntity;
 
-   public WaitForFriendGoal(FriendEntityAbstract friendEntity) {
+   public WaitForFriendGoal(TameableFriendEntity friendEntity) {
       this.friendEntity = friendEntity;
       this.setMutexFlags(EnumSet.of(Goal.Flag.JUMP, Goal.Flag.MOVE));
    }
@@ -52,7 +52,7 @@ public class WaitForFriendGoal extends Goal {
       this.friendEntity.getNavigator().clearPath();
       this.friendEntity.func_233686_v_(true);
       if(!this.friendEntity.world.isRemote && this.friendEntity.getOwner() instanceof ServerPlayerEntity) {
-          this.friendEntity.getOwner().sendMessage(new StringTextComponent(this.friendEntity.getName().getString() + ": I will wait here."), Util.field_240973_b_);
+          this.friendEntity.getOwner().sendMessage(new StringTextComponent(this.friendEntity.getDisplayName().getString() + ": I will wait here!."), Util.field_240973_b_);
       }
    }
 
@@ -62,7 +62,7 @@ public class WaitForFriendGoal extends Goal {
    public void resetTask() {
       this.friendEntity.func_233686_v_(false);
       if(!this.friendEntity.world.isRemote && this.friendEntity.getOwner() instanceof ServerPlayerEntity) {
-    	  this.friendEntity.getOwner().sendMessage(new StringTextComponent(this.friendEntity.getName().getString() + ": Okay let's go!"), Util.field_240973_b_);
+    	  this.friendEntity.getOwner().sendMessage(new StringTextComponent(this.friendEntity.getDisplayName().getString() + ": Okay let's go!"), Util.field_240973_b_);
       }
    }
 }

@@ -13,10 +13,10 @@ import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.pathfinding.WalkNodeProcessor;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorldReader;
-import xratedjunior.myfriend.common.entity.FriendEntityAbstract;
+import xratedjunior.myfriend.common.entity.TameableFriendEntity;
 
 public class FollowFriendGoal extends Goal {
-   private final FriendEntityAbstract tameable;
+   private final TameableFriendEntity tameable;
    private LivingEntity owner;
    private final IWorldReader world;
    private final double followSpeed;
@@ -27,7 +27,7 @@ public class FollowFriendGoal extends Goal {
    private float oldWaterCost;
    private final boolean field_226326_j_;
 
-   public FollowFriendGoal(FriendEntityAbstract entity, double followSpeed, float minDist, float maxDist, boolean p_i225711_6_) {
+   public FollowFriendGoal(TameableFriendEntity entity, double followSpeed, float minDist, float maxDist, boolean p_i225711_6_) {
       this.tameable = entity;
       this.world = entity.world;
       this.followSpeed = followSpeed;

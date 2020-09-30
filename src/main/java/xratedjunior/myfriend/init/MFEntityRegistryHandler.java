@@ -30,7 +30,6 @@ public class MFEntityRegistryHandler
 	{
 		MFEntityTypes.init(event);
 		EntitySpawnPlacementRegistry.register(MFEntityTypes.ROMEO, EntitySpawnPlacementRegistry.PlacementType.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, RomeoEntity::checkRomeoSpawnRules);
-		//HunterModSpawns.registerEntityWorldSpawns();
 	}
 	
 	public static <T extends IForgeRegistryEntry<T>> void register(IForgeRegistry<T> registry, String name, T object)

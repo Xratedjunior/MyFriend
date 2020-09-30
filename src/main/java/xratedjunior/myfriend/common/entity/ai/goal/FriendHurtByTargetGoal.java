@@ -6,14 +6,14 @@ import net.minecraft.entity.EntityPredicate;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.TargetGoal;
-import xratedjunior.myfriend.common.entity.FriendEntityAbstract;
+import xratedjunior.myfriend.common.entity.TameableFriendEntity;
 
 public class FriendHurtByTargetGoal extends TargetGoal {
-   private final FriendEntityAbstract tameable;
+   private final TameableFriendEntity tameable;
    private LivingEntity attacker;
    private int timestamp;
 
-   public FriendHurtByTargetGoal(FriendEntityAbstract theDefendingTameableIn) {
+   public FriendHurtByTargetGoal(TameableFriendEntity theDefendingTameableIn) {
       super(theDefendingTameableIn, false);
       this.tameable = theDefendingTameableIn;
       this.setMutexFlags(EnumSet.of(Goal.Flag.TARGET));

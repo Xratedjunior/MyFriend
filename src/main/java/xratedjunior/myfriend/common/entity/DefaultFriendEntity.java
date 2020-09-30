@@ -11,7 +11,6 @@ import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.IAngerable;
 import net.minecraft.entity.ILivingEntityData;
 import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.LivingEntity;
@@ -24,8 +23,6 @@ import net.minecraft.entity.ai.goal.HurtByTargetGoal;
 import net.minecraft.entity.ai.goal.LookAtGoal;
 import net.minecraft.entity.ai.goal.LookRandomlyGoal;
 import net.minecraft.entity.ai.goal.MeleeAttackGoal;
-import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
-import net.minecraft.entity.ai.goal.ResetAngerGoal;
 import net.minecraft.entity.ai.goal.SwimGoal;
 import net.minecraft.entity.ai.goal.WaterAvoidingRandomWalkingGoal;
 import net.minecraft.entity.player.PlayerEntity;
@@ -53,7 +50,6 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import xratedjunior.myfriend.common.entity.ai.attribute.MFCreatureAttribute;
@@ -62,16 +58,23 @@ import xratedjunior.myfriend.common.entity.ai.goal.FriendHurtByTargetGoal;
 import xratedjunior.myfriend.common.entity.ai.goal.FriendHurtTargetGoal;
 import xratedjunior.myfriend.common.entity.ai.goal.PassiveRangedBowAttackGoal;
 import xratedjunior.myfriend.common.entity.ai.goal.WaitForFriendGoal;
+import xratedjunior.myfriend.common.entity.trading.MFTradingProfession;
 
-public abstract class DefaultFriendEntity extends FriendEntityAbstract implements IAngerable, IRangedAttackMob {
+public abstract class DefaultFriendEntity extends TradeableFriendEntity implements IRangedAttackMob {
 	private static final DataParameter<Integer> field_234232_bz_ = EntityDataManager.createKey(DefaultFriendEntity.class, DataSerializers.VARINT);
 
+	private boolean isAngry;
 	private boolean isWet;
 	private boolean isShaking;
 	private float timeFriendIsShaking;
 	private float prevTimeFriendIsShaking;
 	private static final RangedInteger field_234230_bG_ = TickRangeConverter.func_233037_a_(20, 39);
 	private UUID field_234231_bH_;
+	
+	//private final NonNullList<ItemStack> friendInventory = NonNullList.withSize(8, ItemStack.EMPTY);
+	//protected final float[] friendInventoryDropChances = new float84];
+	
+	//private final Inventory friendInventory = new Inventory(8);
 	   
 	private final PassiveRangedBowAttackGoal<DefaultFriendEntity> bowGoal = new PassiveRangedBowAttackGoal<>(this, 1.0D, 20, 15.0F);
 	private final MeleeAttackGoal meleeGoal = new MeleeAttackGoal(this, 1.2D, false) {
@@ -110,18 +113,11 @@ public abstract class DefaultFriendEntity extends FriendEntityAbstract implement
 		this.goalSelector.addGoal(6, new LookRandomlyGoal(this));
 		this.targetSelector.addGoal(1, new FriendHurtByTargetGoal(this));
 		this.targetSelector.addGoal(2, new FriendHurtTargetGoal(this));
-		this.targetSelector.addGoal(3, (new HurtByTargetGoal(this)).setCallsForHelp());
-		this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, PlayerEntity.class, 10, true, false, this::func_233680_b_));
-		this.targetSelector.addGoal(5, new ResetAngerGoal<>(this, true));
+		this.targetSelector.addGoal(3, new HurtByTargetGoal(this));
 	}
 		
 	public static AttributeModifierMap.MutableAttribute abstractFriendAttributes() {
 		return MobEntity.func_233666_p_().func_233815_a_(Attributes.field_233821_d_, (double)0.3F).func_233815_a_(Attributes.field_233818_a_, 20.0D).func_233815_a_(Attributes.field_233823_f_, 4.0D);
-	}
-	
-	@Override
-	public boolean canBeLeashedTo(PlayerEntity player) {
-	   return false;
 	}
 		
 	protected void registerData() {
@@ -132,10 +128,8 @@ public abstract class DefaultFriendEntity extends FriendEntityAbstract implement
 	@Nullable
 	public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, @Nullable ILivingEntityData spawnDataIn, @Nullable CompoundNBT dataTag) {
 		spawnDataIn = super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
-		this.setEquipmentBasedOnDifficulty(difficultyIn);
-		//this.setEnchantmentBow();
-		//this.setItemStackToSlot(EquipmentSlotType.MAINHAND, new ItemStack(Items.DIAMOND_SWORD));
-		this.setEnchantmentBasedOnDifficulty(difficultyIn);
+		this.enablePersistence();
+		this.isAngry = false;
 		this.setCombatTask();
 		this.setCanPickUpLoot(true);
 		if (this.getItemStackFromSlot(EquipmentSlotType.HEAD).isEmpty()) {
@@ -254,11 +248,6 @@ public abstract class DefaultFriendEntity extends FriendEntityAbstract implement
          this.prevTimeFriendIsShaking = 0.0F;
          this.world.setEntityState(this, (byte)8);
       }
-
-      if (!this.world.isRemote) {
-         this.func_241359_a_((ServerWorld)this.world, true);
-      }
-
    }
 
    /**
@@ -333,6 +322,8 @@ public abstract class DefaultFriendEntity extends FriendEntityAbstract implement
       if (tamed) {
          this.getAttribute(Attributes.field_233818_a_).setBaseValue(20.0D);
          this.setHealth(20.0F);
+         this.setVillagerData(this.getVillagerData().withProfession(MFTradingProfession.FRIEND).withLevel(1));
+
       } else {
          this.getAttribute(Attributes.field_233818_a_).setBaseValue(8.0D);
       }
@@ -345,15 +336,14 @@ public abstract class DefaultFriendEntity extends FriendEntityAbstract implement
       ItemStack itemstack = player.getHeldItem(hand);
       Item item = itemstack.getItem();
       if (this.world.isRemote) {
-         boolean flag = this.isOwner(player) || this.isTamed() || item == Items.COOKIE && !this.isTamed() && !this.func_233678_J__();
+         boolean flag = this.isOwner(player) || this.isTamed() || item == Items.COOKIE && !this.isTamed() && !this.isAngry;
          return flag ? ActionResultType.CONSUME : ActionResultType.PASS;
       } else {
          if (this.isTamed()) {
-            if (this.isBreedingItem(itemstack) && this.getHealth() < this.getMaxHealth()) {
+            if (this.isHealingItem(itemstack) && this.getHealth() < this.getMaxHealth()) {
                if (!player.abilities.isCreativeMode) {
                   itemstack.shrink(1);
                }
-
                this.heal((float)item.getFood().getHealing());
                return ActionResultType.SUCCESS;
             }
@@ -371,7 +361,7 @@ public abstract class DefaultFriendEntity extends FriendEntityAbstract implement
                return actionresulttype;
             }
 
-         } else if (item == Items.COOKIE && !this.func_233678_J__()) {
+         } else if (item == Items.COOKIE && !this.isAngry) {
             if (!player.abilities.isCreativeMode) {
                itemstack.shrink(1);
             }
@@ -411,10 +401,9 @@ public abstract class DefaultFriendEntity extends FriendEntityAbstract implement
    }
 
    /**
-    * Checks if the parameter is an item which this animal can be fed to breed it (wheat, carrots or seeds depending on
-    * the animal type)
+    * Checks if the parameter is an item which this animal can be fed to heal it.
     */
-   public boolean isBreedingItem(ItemStack stack) {
+   public boolean isHealingItem(ItemStack stack) {
       Item item = stack.getItem();
       return item.isFood() && item.getFood().isMeat();
    }
