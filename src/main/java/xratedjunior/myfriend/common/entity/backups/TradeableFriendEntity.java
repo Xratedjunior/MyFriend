@@ -1,4 +1,4 @@
-package xratedjunior.myfriend.common.entity;
+package xratedjunior.myfriend.common.entity.backups;
 
 import javax.annotation.Nullable;
 
@@ -22,7 +22,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.villager.IVillagerDataHolder;
 import net.minecraft.entity.villager.VillagerType;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.item.MerchantOffer;
 import net.minecraft.item.MerchantOffers;
 import net.minecraft.nbt.CompoundNBT;
@@ -55,6 +54,7 @@ import net.minecraft.world.raid.Raid;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import xratedjunior.myfriend.init.MFEntityRegistryHandler;
 
 public abstract class TradeableFriendEntity extends TradeableEntity implements IReputationTracking, IVillagerDataHolder {
    private static final DataParameter<VillagerData> VILLAGER_DATA = EntityDataManager.createKey(TradeableFriendEntity.class, DataSerializers.VILLAGER_DATA);
@@ -64,13 +64,13 @@ public abstract class TradeableFriendEntity extends TradeableEntity implements I
    private PlayerEntity previousCustomer;
    private byte foodLevel;
    private final GossipManager gossip = new GossipManager();
-   private long field_213783_bN;
+   private long lastGossipTime;
    private long lastGossipDecay;
    private int xp;
    private long lastRestock;
-   private int field_223725_bO;
-   private long field_223726_bP;
-   private boolean field_234542_bL_;
+   private int restocksToday;
+   private long lastRestockDayTime;
+   private boolean assignProfessionWhenSpawned;
 
    public TradeableFriendEntity(EntityType<? extends TradeableFriendEntity> type, World worldIn) {
       this(type, worldIn, VillagerType.PLAINS);
@@ -85,14 +85,14 @@ public abstract class TradeableFriendEntity extends TradeableEntity implements I
    }
 
    public boolean func_234552_eW_() {
-      return this.field_234542_bL_;
+      return this.assignProfessionWhenSpawned;
    }
 
    protected void updateAITasks() {
       this.world.getProfiler().startSection("villagerBrain");
       this.world.getProfiler().endSection();
-      if (this.field_234542_bL_) {
-         this.field_234542_bL_ = false;
+      if (this.assignProfessionWhenSpawned) {
+         this.assignProfessionWhenSpawned = false;
       }
 
       if (!this.hasCustomer() && this.timeUntilReset > 0) {
@@ -140,7 +140,7 @@ public abstract class TradeableFriendEntity extends TradeableEntity implements I
 
    public ActionResultType func_230254_b_(PlayerEntity player, Hand hand) {
       ItemStack itemstack = player.getHeldItem(hand);
-      if (itemstack.getItem() != Items.VILLAGER_SPAWN_EGG && this.isAlive() && !this.hasCustomer() && !this.isSleeping() && !player.isSecondaryUseActive()) {
+      if (itemstack.getItem() != MFEntityRegistryHandler.ROMEO_SPAWN_EGG && this.isAlive() && !this.hasCustomer() && !this.isSleeping() && !player.isSecondaryUseActive()) {
          if (this.isChild()) {
             this.shakeHead();
             return ActionResultType.func_233537_a_(this.world.isRemote);
@@ -203,11 +203,11 @@ public abstract class TradeableFriendEntity extends TradeableEntity implements I
 
    }
 
-   public boolean func_223340_ej() {
+   public boolean canRestockTrades() {
       return true;
    }
 
-   public void func_213766_ei() {
+   public void restock() {
       this.calculateDemandOfOffers();
 
       for(MerchantOffer merchantoffer : this.getOffers()) {
@@ -215,7 +215,7 @@ public abstract class TradeableFriendEntity extends TradeableEntity implements I
       }
 
       this.lastRestock = this.world.getGameTime();
-      ++this.field_223725_bO;
+      ++this.restocksToday;
    }
 
    private boolean hasUsedOffer() {
@@ -229,7 +229,7 @@ public abstract class TradeableFriendEntity extends TradeableEntity implements I
    }
 
    private boolean func_223720_ew() {
-      return this.field_223725_bO == 0 || this.field_223725_bO < 2 && this.world.getGameTime() > this.lastRestock + 2400L;
+      return this.restocksToday == 0 || this.restocksToday < 2 && this.world.getGameTime() > this.lastRestock + 2400L;
    }
 
    public boolean func_223721_ek() {
@@ -237,13 +237,13 @@ public abstract class TradeableFriendEntity extends TradeableEntity implements I
       long j = this.world.getGameTime();
       boolean flag = j > i;
       long k = this.world.getDayTime();
-      if (this.field_223726_bP > 0L) {
-         long l = this.field_223726_bP / 24000L;
+      if (this.lastRestockDayTime > 0L) {
+         long l = this.lastRestockDayTime / 24000L;
          long i1 = k / 24000L;
          flag |= i1 > l;
       }
 
-      this.field_223726_bP = k;
+      this.lastRestockDayTime = k;
       if (flag) {
          this.lastRestock = j;
          this.func_223718_eH();
@@ -253,7 +253,7 @@ public abstract class TradeableFriendEntity extends TradeableEntity implements I
    }
 
    private void func_223719_ex() {
-      int i = 2 - this.field_223725_bO;
+      int i = 2 - this.restocksToday;
       if (i > 0) {
          for(MerchantOffer merchantoffer : this.getOffers()) {
             merchantoffer.resetUses();
@@ -309,8 +309,8 @@ public abstract class TradeableFriendEntity extends TradeableEntity implements I
       compound.putInt("Xp", this.xp);
       compound.putLong("LastRestock", this.lastRestock);
       compound.putLong("LastGossipDecay", this.lastGossipDecay);
-      compound.putInt("RestocksToday", this.field_223725_bO);
-      if (this.field_234542_bL_) {
+      compound.putInt("RestocksToday", this.restocksToday);
+      if (this.assignProfessionWhenSpawned) {
          compound.putBoolean("AssignProfessionWhenSpawned", true);
       }
 
@@ -343,9 +343,9 @@ public abstract class TradeableFriendEntity extends TradeableEntity implements I
       this.lastRestock = compound.getLong("LastRestock");
       this.lastGossipDecay = compound.getLong("LastGossipDecay");
       this.setCanPickUpLoot(true);
-      this.field_223725_bO = compound.getInt("RestocksToday");
+      this.restocksToday = compound.getInt("RestocksToday");
       if (compound.contains("AssignProfessionWhenSpawned")) {
-         this.field_234542_bL_ = compound.getBoolean("AssignProfessionWhenSpawned");
+         this.assignProfessionWhenSpawned = compound.getBoolean("AssignProfessionWhenSpawned");
       }
 
    }
@@ -456,10 +456,10 @@ public abstract class TradeableFriendEntity extends TradeableEntity implements I
    }
 
    public void func_213746_a(TradeableFriendEntity villager, long gameTime) {
-      if ((gameTime < this.field_213783_bN || gameTime >= this.field_213783_bN + 1200L) && (gameTime < villager.field_213783_bN || gameTime >= villager.field_213783_bN + 1200L)) {
+      if ((gameTime < this.lastGossipTime || gameTime >= this.lastGossipTime + 1200L) && (gameTime < villager.lastGossipTime || gameTime >= villager.lastGossipTime + 1200L)) {
          this.gossip.transferFrom(villager.gossip, this.rand, 10);
-         this.field_213783_bN = gameTime;
-         villager.field_213783_bN = gameTime;
+         this.lastGossipTime = gameTime;
+         villager.lastGossipTime = gameTime;
       }
    }
 
@@ -475,7 +475,7 @@ public abstract class TradeableFriendEntity extends TradeableEntity implements I
 
    @SuppressWarnings("deprecation")
    @Nullable
-   private BlockPos func_241433_a_(BlockPos p_241433_1_, double p_241433_2_, double p_241433_4_) {
+   private BlockPos getValidGolemSpawnPosition(BlockPos p_241433_1_, double p_241433_2_, double p_241433_4_) {
       BlockPos blockpos = p_241433_1_.add(p_241433_2_, 6.0D, p_241433_4_);
       BlockState blockstate = this.world.getBlockState(blockpos);
 
@@ -492,6 +492,7 @@ public abstract class TradeableFriendEntity extends TradeableEntity implements I
       return null;
    }
 
+   @Override
    public void updateReputation(IReputationType type, Entity target) {
       if (type == IReputationType.ZOMBIE_VILLAGER_CURED) {
          this.gossip.add(target.getUniqueID(), GossipType.MAJOR_POSITIVE, 20);
@@ -516,7 +517,7 @@ public abstract class TradeableFriendEntity extends TradeableEntity implements I
 
    private void func_223718_eH() {
       this.func_223719_ex();
-      this.field_223725_bO = 0;
+      this.restocksToday = 0;
    }
 
    public GossipManager getGossip() {

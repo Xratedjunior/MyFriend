@@ -6,14 +6,14 @@ import net.minecraft.entity.EntityPredicate;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.TargetGoal;
-import xratedjunior.myfriend.common.entity.TameableFriendEntity;
+import xratedjunior.myfriend.common.entity.FriendEntity;
 
 public class FriendHurtByTargetGoal extends TargetGoal {
-   private final TameableFriendEntity tameable;
+   private final FriendEntity tameable;
    private LivingEntity attacker;
    private int timestamp;
 
-   public FriendHurtByTargetGoal(TameableFriendEntity theDefendingTameableIn) {
+   public FriendHurtByTargetGoal(FriendEntity theDefendingTameableIn) {
       super(theDefendingTameableIn, false);
       this.tameable = theDefendingTameableIn;
       this.setMutexFlags(EnumSet.of(Goal.Flag.TARGET));
@@ -24,7 +24,7 @@ public class FriendHurtByTargetGoal extends TargetGoal {
     * method as well.
     */
    public boolean shouldExecute() {
-      if (this.tameable.isTamed() && !this.tameable.func_233685_eM_()) {
+      if (this.tameable.isTamed() && !this.tameable.isSitting()) {
          LivingEntity livingentity = this.tameable.getOwner();
          if (livingentity == null) {
             return false;

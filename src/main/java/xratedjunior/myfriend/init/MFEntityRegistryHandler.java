@@ -19,10 +19,14 @@ import xratedjunior.myfriend.core.MyFriend;
 @EventBusSubscriber(modid = MyFriend.MOD_ID, bus = Bus.MOD)
 public class MFEntityRegistryHandler 
 {	
+	public static final Item ROMEO_SPAWN_EGG = new SpawnEggItem(MFEntityTypes.ROMEO, 0xfbc79d, 0xb50000, new Item.Properties().group(ItemGroup.MISC));
+	
 	@SubscribeEvent
 	public static void onRegisterItems(Register<Item> event)
 	{
-		register(event.getRegistry(), "romeo_spawn_egg", new SpawnEggItem(MFEntityTypes.ROMEO, 0xfbc79d, 0xb50000, new Item.Properties().group(ItemGroup.MISC)));
+//		register(event.getRegistry(), "romeo_spawn_egg", new SpawnEggItem(MFEntityTypes.ROMEO, 0xfbc79d, 0xb50000, new Item.Properties().group(ItemGroup.MISC)));
+		register(event.getRegistry(), "romeo_spawn_egg", ROMEO_SPAWN_EGG);
+
 	}
 
 	@SubscribeEvent

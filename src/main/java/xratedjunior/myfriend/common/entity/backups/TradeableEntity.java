@@ -1,4 +1,4 @@
-package xratedjunior.myfriend.common.entity;
+package xratedjunior.myfriend.common.entity.backups;
 
 import java.util.Set;
 
@@ -37,14 +37,15 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import xratedjunior.myfriend.common.entity.FriendEntity;
 
-public abstract class TradeableEntity extends TameableFriendEntity implements INPC, IMerchant {
-   private static final DataParameter<Integer> SHAKE_HEAD_TICKS = EntityDataManager.createKey(TradeableEntity.class, DataSerializers.VARINT);
-   @Nullable
-   private PlayerEntity customer;
-   @Nullable
-   protected MerchantOffers offers;
-   private final Inventory villagerInventory = new Inventory(8);
+public abstract class TradeableEntity extends FriendEntity implements INPC, IMerchant {
+	private static final DataParameter<Integer> SHAKE_HEAD_TICKS = EntityDataManager.createKey(TradeableEntity.class, DataSerializers.VARINT);
+	@Nullable
+	private PlayerEntity customer;
+	@Nullable
+	protected MerchantOffers offers;
+	private final Inventory villagerInventory = new Inventory(8);
 
    public TradeableEntity(EntityType<? extends TradeableEntity> type, World worldIn) {
       super(type, worldIn);

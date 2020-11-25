@@ -1,4 +1,4 @@
-package xratedjunior.myfriend.common.entity;
+package xratedjunior.myfriend.common.entity.backups;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
@@ -64,6 +64,7 @@ import xratedjunior.myfriend.common.entity.ai.goal.FriendHurtTargetGoal;
 import xratedjunior.myfriend.common.entity.ai.goal.PassiveRangedBowAttackGoal;
 import xratedjunior.myfriend.common.entity.ai.goal.WaitForFriendGoal;
 import xratedjunior.myfriend.common.entity.trading.MFTradingProfession;
+import xratedjunior.myfriend.core.MyFriend;
 
 public abstract class DefaultFriendEntity extends TradeableFriendEntity implements IRangedAttackMob {
 	private static final DataParameter<Integer> field_234232_bz_ = EntityDataManager.createKey(DefaultFriendEntity.class, DataSerializers.VARINT);
@@ -547,7 +548,7 @@ public abstract class DefaultFriendEntity extends TradeableFriendEntity implemen
 	               ActionResultType actionresulttype = super.func_230254_b_(player, hand);
 	               //WAIT
 	               if ((!actionresulttype.isSuccessOrConsume() || this.isChild()) && this.isOwner(player) && Screen.hasShiftDown()) {
-	                  this.func_233687_w_(!this.func_233685_eM_());
+	                  this.setIsSitting(!this.isSitting());
 	                  this.isJumping = false;
 	                  this.navigator.clearPath();
 	                  this.setAttackTarget((LivingEntity)null);
@@ -565,7 +566,7 @@ public abstract class DefaultFriendEntity extends TradeableFriendEntity implemen
 	               this.setTamedBy(player);
 	               this.navigator.clearPath();
 	               this.setAttackTarget((LivingEntity)null);
-	               this.func_233687_w_(true);
+	               this.setIsSitting(true);
 	               this.world.setEntityState(this, (byte)7);
 	            } else {
 	               this.world.setEntityState(this, (byte)6);
@@ -575,6 +576,7 @@ public abstract class DefaultFriendEntity extends TradeableFriendEntity implemen
 	         }
 			   
 		      if ((itemstack.getItem() != Items.NAME_TAG && Screen.hasShiftDown())) {
+		    	  super.func_230254_b_(player, hand);
 		         if (player.isSpectator()) {
 		            return ActionResultType.SUCCESS;
 		         } else if (player.world.isRemote) {
@@ -592,8 +594,10 @@ public abstract class DefaultFriendEntity extends TradeableFriendEntity implemen
 		            return ActionResultType.PASS;
 		         }
 		      } else {
+	               MyFriend.logger.info("TEST");
+
 		    	  super.func_230254_b_(player, hand);
-		         return ActionResultType.PASS;
+		    	  return ActionResultType.PASS;
 		      }
 	      }
    }

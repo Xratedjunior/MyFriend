@@ -7,12 +7,12 @@ import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.StringTextComponent;
-import xratedjunior.myfriend.common.entity.TameableFriendEntity;
+import xratedjunior.myfriend.common.entity.FriendEntity;
 
 public class WaitForFriendGoal extends Goal {
-   private final TameableFriendEntity friendEntity;
+   private final FriendEntity friendEntity;
 
-   public WaitForFriendGoal(TameableFriendEntity friendEntity) {
+   public WaitForFriendGoal(FriendEntity friendEntity) {
       this.friendEntity = friendEntity;
       this.setMutexFlags(EnumSet.of(Goal.Flag.JUMP, Goal.Flag.MOVE));
    }
@@ -22,7 +22,7 @@ public class WaitForFriendGoal extends Goal {
     */
    @Override
    public boolean shouldContinueExecuting() {
-      return this.friendEntity.func_233685_eM_();
+      return this.friendEntity.isSitting();
    }
 
    /**
@@ -42,7 +42,7 @@ public class WaitForFriendGoal extends Goal {
          if (livingentity == null) {
             return true;
          } else {
-            return this.friendEntity.getDistanceSq(livingentity) < 144.0D && livingentity.getRevengeTarget() != null ? false : this.friendEntity.func_233685_eM_();
+            return this.friendEntity.getDistanceSq(livingentity) < 144.0D && livingentity.getRevengeTarget() != null ? false : this.friendEntity.isSitting();
          }
       }
    }
@@ -53,7 +53,7 @@ public class WaitForFriendGoal extends Goal {
    @Override
    public void startExecuting() {
       this.friendEntity.getNavigator().clearPath();
-      this.friendEntity.func_233686_v_(true);
+      this.friendEntity.setSleeping(true);
       if(!this.friendEntity.world.isRemote && this.friendEntity.getOwner() instanceof ServerPlayerEntity) {
           this.friendEntity.getOwner().sendMessage(new StringTextComponent(this.friendEntity.getDisplayName().getString() + ": I will wait here!."), Util.DUMMY_UUID);
       }
@@ -64,7 +64,7 @@ public class WaitForFriendGoal extends Goal {
     */
    @Override
    public void resetTask() {
-      this.friendEntity.func_233686_v_(false);
+      this.friendEntity.setSleeping(false);
       if(!this.friendEntity.world.isRemote && this.friendEntity.getOwner() instanceof ServerPlayerEntity) {
     	  this.friendEntity.getOwner().sendMessage(new StringTextComponent(this.friendEntity.getDisplayName().getString() + ": Okay let's go!"), Util.DUMMY_UUID);
       }

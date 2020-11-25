@@ -6,7 +6,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.attributes.GlobalEntityTypeAttributes;
 import net.minecraftforge.event.RegistryEvent.Register;
 import net.minecraftforge.registries.ObjectHolder;
-import xratedjunior.myfriend.common.entity.DefaultFriendEntity;
+import xratedjunior.myfriend.common.entity.FriendEntity;
 import xratedjunior.myfriend.common.entity.RomeoEntity;
 import xratedjunior.myfriend.core.MyFriend;
 import xratedjunior.myfriend.init.MFEntityRegistryHandler;
@@ -19,7 +19,7 @@ public class MFEntityTypes
 	public static void init(Register<EntityType<?>> event)
 	{
 		MFEntityRegistryHandler.register(event.getRegistry(), "romeo", ROMEO);
-		GlobalEntityTypeAttributes.put(ROMEO, DefaultFriendEntity.abstractFriendAttributes().create());
+		GlobalEntityTypeAttributes.put(ROMEO, FriendEntity.abstractFriendAttributes().create());
 	}
 	
 	private static <T extends Entity> EntityType<T> buildEntity(String key, EntityType.Builder<T> builder)

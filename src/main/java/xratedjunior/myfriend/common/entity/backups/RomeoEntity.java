@@ -1,4 +1,4 @@
-package xratedjunior.myfriend.common.entity;
+package xratedjunior.myfriend.common.entity.backups;
 
 import java.util.Random;
 
@@ -8,9 +8,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
-import xratedjunior.myfriend.api.entity.MFEntityTypes;
 
-public class RomeoEntity extends FriendEntity
+public class RomeoEntity extends DefaultFriendEntity
 {
 	public RomeoEntity(EntityType<? extends RomeoEntity> type, World worldIn) {
 		super(type, worldIn);
@@ -22,6 +21,6 @@ public class RomeoEntity extends FriendEntity
 	
 	@Override
 	protected RomeoEntity createChild(ServerWorld serverWorld) {
-		return MFEntityTypes.ROMEO.create(serverWorld);
+		return null;//MFEntityTypes.ROMEO.create(serverWorld);
 	}
 }
