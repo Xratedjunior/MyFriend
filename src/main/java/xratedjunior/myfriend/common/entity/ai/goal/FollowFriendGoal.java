@@ -45,6 +45,7 @@ public class FollowFriendGoal extends Goal {
     * Returns whether execution should begin. You can also read and cache any state necessary for execution in this
     * method as well.
     */
+   @Override
    public boolean shouldExecute() {
       LivingEntity livingentity = this.tameable.getOwner();
       if (livingentity == null) {
@@ -64,6 +65,7 @@ public class FollowFriendGoal extends Goal {
    /**
     * Returns whether an in-progress EntityAIBase should continue executing
     */
+   @Override
    public boolean shouldContinueExecuting() {
       if (this.navigator.noPath()) {
          return false;
@@ -77,6 +79,7 @@ public class FollowFriendGoal extends Goal {
    /**
     * Execute a one shot task or start executing a continuous task
     */
+   @Override
    public void startExecuting() {
       this.timeToRecalcPath = 0;
       this.oldWaterCost = this.tameable.getPathPriority(PathNodeType.WATER);
@@ -86,6 +89,7 @@ public class FollowFriendGoal extends Goal {
    /**
     * Reset the task's internal state. Called when this task is interrupted by another one
     */
+   @Override
    public void resetTask() {
       this.owner = null;
       this.navigator.clearPath();
@@ -95,6 +99,7 @@ public class FollowFriendGoal extends Goal {
    /**
     * Keep ticking a continuous task that has already been started
     */
+   @Override
    public void tick() {
       this.tameable.getLookController().setLookPositionWithEntity(this.owner, 10.0F, (float)this.tameable.getVerticalFaceSpeed());
       if (--this.timeToRecalcPath <= 0) {
@@ -111,7 +116,7 @@ public class FollowFriendGoal extends Goal {
    }
 
    private void func_226330_g_() {
-      BlockPos blockpos = this.owner.func_233580_cy_();
+      BlockPos blockpos = this.owner.getPosition();
 
       for(int i = 0; i < 10; ++i) {
          int j = this.func_226327_a_(-3, 3);
@@ -138,7 +143,7 @@ public class FollowFriendGoal extends Goal {
    }
 
    private boolean func_226329_a_(BlockPos p_226329_1_) {
-      PathNodeType pathnodetype = WalkNodeProcessor.func_237231_a_(this.world, p_226329_1_.func_239590_i_());
+      PathNodeType pathnodetype = WalkNodeProcessor.func_237231_a_(this.world, p_226329_1_.toMutable());
       if (pathnodetype != PathNodeType.WALKABLE) {
          return false;
       } else {
@@ -146,7 +151,7 @@ public class FollowFriendGoal extends Goal {
          if (!this.field_226326_j_ && blockstate.getBlock() instanceof LeavesBlock) {
             return false;
          } else {
-            BlockPos blockpos = p_226329_1_.subtract(this.tameable.func_233580_cy_());
+            BlockPos blockpos = p_226329_1_.subtract(this.tameable.getPosition());
             return this.world.hasNoCollisions(this.tameable, this.tameable.getBoundingBox().offset(blockpos));
          }
       }

@@ -19,7 +19,7 @@ public class MFEntityTypes
 	public static void init(Register<EntityType<?>> event)
 	{
 		MFEntityRegistryHandler.register(event.getRegistry(), "romeo", ROMEO);
-		GlobalEntityTypeAttributes.put(ROMEO, DefaultFriendEntity.abstractFriendAttributes().func_233813_a_());
+		GlobalEntityTypeAttributes.put(ROMEO, DefaultFriendEntity.abstractFriendAttributes().create());
 	}
 	
 	private static <T extends Entity> EntityType<T> buildEntity(String key, EntityType.Builder<T> builder)

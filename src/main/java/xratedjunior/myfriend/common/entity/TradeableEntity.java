@@ -32,7 +32,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.IWorld;
+import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
@@ -52,10 +52,10 @@ public abstract class TradeableEntity extends TameableFriendEntity implements IN
       this.setPathPriority(PathNodeType.DAMAGE_FIRE, -1.0F);
    }
 
-   public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, @Nullable ILivingEntityData spawnDataIn, @Nullable CompoundNBT dataTag) {
+   @Override
+   public ILivingEntityData onInitialSpawn(IServerWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, @Nullable ILivingEntityData spawnDataIn, @Nullable CompoundNBT dataTag) {
       if (spawnDataIn == null) {
-         spawnDataIn = new AgeableEntity.AgeableData();
-         ((AgeableEntity.AgeableData)spawnDataIn).func_226259_a_(false);
+         spawnDataIn = new AgeableEntity.AgeableData(false);
       }
 
       return super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
@@ -69,24 +69,29 @@ public abstract class TradeableEntity extends TameableFriendEntity implements IN
       this.dataManager.set(SHAKE_HEAD_TICKS, p_213720_1_);
    }
 
+   @Override
    public int getXp() {
       return 0;
    }
 
+   @Override
    protected float getStandingEyeHeight(Pose poseIn, EntitySize sizeIn) {
       return this.isChild() ? 0.81F : 1.62F;
    }
 
+   @Override
    protected void registerData() {
       super.registerData();
       this.dataManager.register(SHAKE_HEAD_TICKS, 0);
    }
 
+   @Override
    public void setCustomer(@Nullable PlayerEntity player) {
       this.customer = player;
    }
 
    @Nullable
+   @Override
    public PlayerEntity getCustomer() {
       return this.customer;
    }
@@ -95,6 +100,7 @@ public abstract class TradeableEntity extends TameableFriendEntity implements IN
       return this.customer != null;
    }
 
+   @Override
    public MerchantOffers getOffers() {
       if (this.offers == null) {
          this.offers = new MerchantOffers();
@@ -105,12 +111,15 @@ public abstract class TradeableEntity extends TameableFriendEntity implements IN
    }
 
    @OnlyIn(Dist.CLIENT)
+   @Override
    public void setClientSideOffers(@Nullable MerchantOffers offers) {
    }
 
+   @Override
    public void setXP(int xpIn) {
    }
 
+   @Override
    public void onTrade(MerchantOffer offer) {
       offer.increaseUses();
       this.livingSoundTime = -this.getTalkInterval();
@@ -123,7 +132,8 @@ public abstract class TradeableEntity extends TameableFriendEntity implements IN
 
    protected abstract void onVillagerTrade(MerchantOffer offer);
 
-   public boolean func_213705_dZ() {
+   @Override
+   public boolean hasXPBar() {
       return true;
    }
 
@@ -131,6 +141,7 @@ public abstract class TradeableEntity extends TameableFriendEntity implements IN
     * Notifies the merchant of a possible merchantrecipe being fulfilled or not. Usually, this is just a sound byte
     * being played depending if the suggested itemstack is not null.
     */
+   @Override
    public void verifySellingItem(ItemStack stack) {
       if (!this.world.isRemote && this.livingSoundTime > -this.getTalkInterval() + 20) {
          this.livingSoundTime = -this.getTalkInterval();
@@ -139,6 +150,7 @@ public abstract class TradeableEntity extends TameableFriendEntity implements IN
 
    }
 
+   @Override
    public SoundEvent getYesSound() {
       return SoundEvents.ENTITY_VILLAGER_YES;
    }
@@ -151,6 +163,7 @@ public abstract class TradeableEntity extends TameableFriendEntity implements IN
       this.playSound(SoundEvents.ENTITY_VILLAGER_CELEBRATE, this.getSoundVolume(), this.getSoundPitch());
    }
 
+   @Override
    public void writeAdditional(CompoundNBT compound) {
       super.writeAdditional(compound);
       MerchantOffers merchantoffers = this.getOffers();
@@ -164,6 +177,7 @@ public abstract class TradeableEntity extends TameableFriendEntity implements IN
    /**
     * (abstract) Protected helper method to read subclass entity data from NBT.
     */
+   @Override
    public void readAdditional(CompoundNBT compound) {
       super.readAdditional(compound);
       if (compound.contains("Offers", 10)) {
@@ -174,6 +188,7 @@ public abstract class TradeableEntity extends TameableFriendEntity implements IN
    }
 
    @Nullable
+   @Override
    public Entity changeDimension(ServerWorld p_241206_1_, net.minecraftforge.common.util.ITeleporter teleporter) {
       this.resetCustomer();
       return super.changeDimension(p_241206_1_, teleporter);
@@ -186,6 +201,7 @@ public abstract class TradeableEntity extends TameableFriendEntity implements IN
    /**
     * Called when the mob's health reaches 0.
     */
+   @Override
    public void onDeath(DamageSource cause) {
       super.onDeath(cause);
       this.resetCustomer();
@@ -202,6 +218,7 @@ public abstract class TradeableEntity extends TameableFriendEntity implements IN
 
    }
 
+   @Override
    public boolean canBeLeashedTo(PlayerEntity player) {
       return false;
    }
@@ -210,6 +227,7 @@ public abstract class TradeableEntity extends TameableFriendEntity implements IN
       return this.villagerInventory;
    }
 
+   @Override
    public boolean replaceItemInInventory(int inventorySlot, ItemStack itemStackIn) {
       if (super.replaceItemInInventory(inventorySlot, itemStackIn)) {
          return true;
@@ -224,6 +242,7 @@ public abstract class TradeableEntity extends TameableFriendEntity implements IN
       }
    }
 
+   @Override
    public World getWorld() {
       return this.world;
    }

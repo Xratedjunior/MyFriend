@@ -20,7 +20,7 @@ import net.minecraft.entity.merchant.villager.VillagerProfession;
 import net.minecraft.entity.merchant.villager.VillagerTrades;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.villager.IVillagerDataHolder;
-import net.minecraft.entity.villager.IVillagerType;
+import net.minecraft.entity.villager.VillagerType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.MerchantOffer;
@@ -49,7 +49,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.village.GossipManager;
 import net.minecraft.village.GossipType;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.IWorld;
+import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.raid.Raid;
 import net.minecraft.world.server.ServerWorld;
@@ -73,10 +73,10 @@ public abstract class TradeableFriendEntity extends TradeableEntity implements I
    private boolean field_234542_bL_;
 
    public TradeableFriendEntity(EntityType<? extends TradeableFriendEntity> type, World worldIn) {
-      this(type, worldIn, IVillagerType.PLAINS);
+      this(type, worldIn, VillagerType.PLAINS);
    }
 
-   public TradeableFriendEntity(EntityType<? extends TradeableFriendEntity> type, World worldIn, IVillagerType villagerType) {
+   public TradeableFriendEntity(EntityType<? extends TradeableFriendEntity> type, World worldIn, VillagerType villagerType) {
       super(type, worldIn);
       ((GroundPathNavigator)this.getNavigator()).setBreakDoors(true);
       this.getNavigator().setCanSwim(true);
@@ -114,7 +114,7 @@ public abstract class TradeableFriendEntity extends TradeableEntity implements I
       }
 
       if (!this.isAIDisabled() && this.rand.nextInt(100) == 0) {
-         Raid raid = ((ServerWorld)this.world).findRaid(this.func_233580_cy_());
+         Raid raid = ((ServerWorld)this.world).findRaid(this.getPosition());
          if (raid != null && raid.isActive() && !raid.isOver()) {
             this.world.setEntityState(this, (byte)42);
          }
@@ -296,16 +296,16 @@ public abstract class TradeableFriendEntity extends TradeableEntity implements I
 
    protected void registerData() {
       super.registerData();
-      this.dataManager.register(VILLAGER_DATA, new VillagerData(IVillagerType.PLAINS, VillagerProfession.NONE, 1));
+      this.dataManager.register(VILLAGER_DATA, new VillagerData(VillagerType.PLAINS, VillagerProfession.NONE, 1));
    }
 
    public void writeAdditional(CompoundNBT compound) {
       super.writeAdditional(compound);
-      VillagerData.field_234554_a_.encodeStart(NBTDynamicOps.INSTANCE, this.getVillagerData()).resultOrPartial(LOGGER::error).ifPresent((p_234547_1_) -> {
+      VillagerData.CODEC.encodeStart(NBTDynamicOps.INSTANCE, this.getVillagerData()).resultOrPartial(LOGGER::error).ifPresent((p_234547_1_) -> {
          compound.put("VillagerData", p_234547_1_);
       });
       compound.putByte("FoodLevel", this.foodLevel);
-      compound.put("Gossips", this.gossip.func_234058_a_(NBTDynamicOps.INSTANCE).getValue());
+      compound.put("Gossips", this.gossip.write(NBTDynamicOps.INSTANCE).getValue());
       compound.putInt("Xp", this.xp);
       compound.putLong("LastRestock", this.lastRestock);
       compound.putLong("LastGossipDecay", this.lastGossipDecay);
@@ -322,7 +322,7 @@ public abstract class TradeableFriendEntity extends TradeableEntity implements I
    public void readAdditional(CompoundNBT compound) {
       super.readAdditional(compound);
       if (compound.contains("VillagerData", 10)) {
-         DataResult<VillagerData> dataresult = VillagerData.field_234554_a_.parse(new Dynamic<>(NBTDynamicOps.INSTANCE, compound.get("VillagerData")));
+         DataResult<VillagerData> dataresult = VillagerData.CODEC.parse(new Dynamic<>(NBTDynamicOps.INSTANCE, compound.get("VillagerData")));
          dataresult.resultOrPartial(LOGGER::error).ifPresent(this::setVillagerData);
       }
 
@@ -335,7 +335,7 @@ public abstract class TradeableFriendEntity extends TradeableEntity implements I
       }
 
       ListNBT listnbt = compound.getList("Gossips", 10);
-      this.gossip.func_234057_a_(new Dynamic<>(NBTDynamicOps.INSTANCE, listnbt));
+      this.gossip.read(new Dynamic<>(NBTDynamicOps.INSTANCE, listnbt));
       if (compound.contains("Xp", 3)) {
          this.xp = compound.getInt("Xp");
       }
@@ -404,7 +404,7 @@ public abstract class TradeableFriendEntity extends TradeableEntity implements I
 
    private boolean canLevelUp() {
       int i = this.getVillagerData().getLevel();
-      return VillagerData.func_221128_d(i) && this.xp >= VillagerData.func_221127_c(i);
+      return VillagerData.canLevelUp(i) && this.xp >= VillagerData.getExperienceNext(i);
    }
 
    private void levelUp() {
@@ -437,8 +437,8 @@ public abstract class TradeableFriendEntity extends TradeableEntity implements I
    }
 
    @Nullable
-   public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, @Nullable ILivingEntityData spawnDataIn, @Nullable CompoundNBT dataTag) {
-	   this.setVillagerData(this.getVillagerData().withType(IVillagerType.byBiome(worldIn.getBiome(this.func_233580_cy_()))));
+   public ILivingEntityData onInitialSpawn(IServerWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, @Nullable ILivingEntityData spawnDataIn, @Nullable CompoundNBT dataTag) {
+	   this.setVillagerData(this.getVillagerData().withType(VillagerType.func_242371_a(worldIn.func_242406_i(this.getPosition()))));
 	   this.setVillagerData(this.getVillagerData().withProfession(VillagerProfession.NONE));
 	   return super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
    }
@@ -524,7 +524,7 @@ public abstract class TradeableFriendEntity extends TradeableEntity implements I
    }
 
    public void func_223716_a(INBT p_223716_1_) {
-      this.gossip.func_234057_a_(new Dynamic<>(NBTDynamicOps.INSTANCE, p_223716_1_));
+      this.gossip.read(new Dynamic<>(NBTDynamicOps.INSTANCE, p_223716_1_));
    }
 
    protected void sendDebugPackets() {
@@ -541,6 +541,6 @@ public abstract class TradeableFriendEntity extends TradeableEntity implements I
 
    public void wakeUp() {
       super.wakeUp();
-      this.brain.setMemory(MemoryModuleType.field_226332_A_, this.world.getGameTime());
+      this.brain.setMemory(MemoryModuleType.LAST_WOKEN, this.world.getGameTime());
    }
 }

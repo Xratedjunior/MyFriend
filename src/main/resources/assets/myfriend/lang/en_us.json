@@ -2,6 +2,7 @@
 	//Entity
 	"entity.myfriend.romeo": "Romeo",
 	"entity.myfriend.romeo.myfriend.friend": "Romeo",
+	"entity.myfriend.romeo.none": "Romeo",
 	
 	//Entity Spawn Eggs
 	"item.myfriend.romeo_spawn_egg": "Romeo Spawn Egg"

@@ -219,7 +219,7 @@ public abstract class TameableFriendEntity extends CreatureEntity
 	 */
 	public void onDeath(DamageSource cause) {
 	   if (!this.world.isRemote && this.world.getGameRules().getBoolean(GameRules.SHOW_DEATH_MESSAGES) && this.getOwner() instanceof ServerPlayerEntity) {
-	      this.getOwner().sendMessage(this.getCombatTracker().getDeathMessage(), Util.field_240973_b_);
+	      this.getOwner().sendMessage(this.getCombatTracker().getDeathMessage(), Util.DUMMY_UUID);
 	   }
 	
 	   super.onDeath(cause);

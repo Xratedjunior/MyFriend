@@ -53,7 +53,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.IWorld;
+import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -64,7 +64,6 @@ import xratedjunior.myfriend.common.entity.ai.goal.FriendHurtTargetGoal;
 import xratedjunior.myfriend.common.entity.ai.goal.PassiveRangedBowAttackGoal;
 import xratedjunior.myfriend.common.entity.ai.goal.WaitForFriendGoal;
 import xratedjunior.myfriend.common.entity.trading.MFTradingProfession;
-import xratedjunior.myfriend.core.MyFriend;
 
 public abstract class DefaultFriendEntity extends TradeableFriendEntity implements IRangedAttackMob {
 	private static final DataParameter<Integer> field_234232_bz_ = EntityDataManager.createKey(DefaultFriendEntity.class, DataSerializers.VARINT);
@@ -74,7 +73,7 @@ public abstract class DefaultFriendEntity extends TradeableFriendEntity implemen
 	private boolean isShaking;
 	private float timeFriendIsShaking;
 	private float prevTimeFriendIsShaking;
-	private static final RangedInteger field_234230_bG_ = TickRangeConverter.func_233037_a_(20, 39);
+	private static final RangedInteger field_234230_bG_ = TickRangeConverter.convertRange(20, 39);
 	private UUID field_234231_bH_;
 	
 	//private final NonNullList<ItemStack> friendInventory = NonNullList.withSize(8, ItemStack.EMPTY);
@@ -109,6 +108,7 @@ public abstract class DefaultFriendEntity extends TradeableFriendEntity implemen
 		this.experienceValue = 5;
 	}
 
+	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(1, new SwimGoal(this));
 		this.goalSelector.addGoal(2, new WaitForFriendGoal(this));
@@ -123,16 +123,18 @@ public abstract class DefaultFriendEntity extends TradeableFriendEntity implemen
 	}
 		
 	public static AttributeModifierMap.MutableAttribute abstractFriendAttributes() {
-		return MobEntity.func_233666_p_().func_233815_a_(Attributes.field_233821_d_, (double)0.3F).func_233815_a_(Attributes.field_233818_a_, 20.0D).func_233815_a_(Attributes.field_233823_f_, 4.0D);
+		return MobEntity.func_233666_p_().createMutableAttribute(Attributes.MOVEMENT_SPEED, (double)0.3F).createMutableAttribute(Attributes.MAX_HEALTH, 20.0D).createMutableAttribute(Attributes.ATTACK_DAMAGE, 4.0D);
 	}
-		
+	
+	@Override
 	protected void registerData() {
 		super.registerData();
 		this.dataManager.register(field_234232_bz_, 0);
 	}
 	
 	@Nullable
-	public ILivingEntityData onInitialSpawn(IWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, @Nullable ILivingEntityData spawnDataIn, @Nullable CompoundNBT dataTag) {
+	@Override
+	public ILivingEntityData onInitialSpawn(IServerWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, @Nullable ILivingEntityData spawnDataIn, @Nullable CompoundNBT dataTag) {
 		spawnDataIn = super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
 		this.enablePersistence();
 		this.isAngry = false;
@@ -331,15 +333,15 @@ public abstract class DefaultFriendEntity extends TradeableFriendEntity implemen
    public void setTamed(boolean tamed) {
       super.setTamed(tamed);
       if (tamed) {
-         this.getAttribute(Attributes.field_233818_a_).setBaseValue(20.0D);
+         this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(20.0D);
          this.setHealth(20.0F);
          this.setVillagerData(this.getVillagerData().withProfession(MFTradingProfession.FRIEND).withLevel(1));
 
       } else {
-         this.getAttribute(Attributes.field_233818_a_).setBaseValue(8.0D);
+         this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(8.0D);
       }
 
-      this.getAttribute(Attributes.field_233823_f_).setBaseValue(4.0D);
+      this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(4.0D);
    }
 
    /*
@@ -431,7 +433,7 @@ public abstract class DefaultFriendEntity extends TradeableFriendEntity implemen
    }
 
    public void func_230258_H__() {
-      this.func_230260_a__(field_234230_bG_.func_233018_a_(this.rand));
+      this.func_230260_a__(field_234230_bG_.getRandomWithinRange(this.rand));
    }
 
    @Nullable
@@ -450,14 +452,17 @@ public abstract class DefaultFriendEntity extends TradeableFriendEntity implemen
    private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
    
+   @Override
    public Iterable<ItemStack> getHeldEquipment() {
       return this.handItems;
    }
 
+   @Override
    public Iterable<ItemStack> getArmorInventoryList() {
       return this.armorItems;
    }
-	   
+	  
+   @Override
    public ItemStack getItemStackFromSlot(EquipmentSlotType slotIn) {
       switch(slotIn.getSlotType()) {
       case HAND:
@@ -469,6 +474,7 @@ public abstract class DefaultFriendEntity extends TradeableFriendEntity implemen
       }
    }
 
+   @Override
    public void setItemStackToSlot(EquipmentSlotType slotIn, ItemStack stack) {
       switch(slotIn.getSlotType()) {
       case HAND:
@@ -485,6 +491,7 @@ public abstract class DefaultFriendEntity extends TradeableFriendEntity implemen
       }
    }
 
+   @Override
    public boolean replaceItemInInventory(int inventorySlot, ItemStack itemStackIn) {
       EquipmentSlotType equipmentslottype;
       if (inventorySlot == 98) {
@@ -513,12 +520,13 @@ public abstract class DefaultFriendEntity extends TradeableFriendEntity implemen
       }
    }
    
-   /**
-    * Applies the given player interaction to this Entity.
-    */
-   public ActionResultType applyPlayerInteraction(PlayerEntity player, Vector3d vec, Hand hand) {
-	   ItemStack itemstack = player.getHeldItem(hand);
-	      Item item = itemstack.getItem();
+	/**
+	 * Applies the given player interaction to this Entity.
+	 */
+	@Override
+	public ActionResultType applyPlayerInteraction(PlayerEntity player, Vector3d vec, Hand hand) {
+		ItemStack itemstack = player.getHeldItem(hand);
+		Item item = itemstack.getItem();
 	      if (this.world.isRemote) {
 	         boolean flag = this.isOwner(player) || this.isTamed() || item == Items.COOKIE && !this.isTamed() && !this.isAngry;
 	         return flag ? ActionResultType.CONSUME : ActionResultType.PASS;
@@ -534,12 +542,11 @@ public abstract class DefaultFriendEntity extends TradeableFriendEntity implemen
 	               this.heal((float)item.getFood().getHealing());
 	               return ActionResultType.SUCCESS;
 	            }
-	            
-	            MyFriend.logger.info(this.hasItemInSlot(equipmentslottype1));
+	      
 	            if (!(item instanceof DyeItem) && equipmentslottype.getSlotType() != EquipmentSlotType.Group.ARMOR && !(item instanceof TieredItem) && !(item instanceof ShootableItem) && (itemstack.isEmpty() && !this.hasItemInSlot(equipmentslottype1))) {
 	               ActionResultType actionresulttype = super.func_230254_b_(player, hand);
 	               //WAIT
-	               if ((!actionresulttype.isSuccessOrConsume() || this.isChild()) && this.isOwner(player) && Screen.func_231173_s_()) {
+	               if ((!actionresulttype.isSuccessOrConsume() || this.isChild()) && this.isOwner(player) && Screen.hasShiftDown()) {
 	                  this.func_233687_w_(!this.func_233685_eM_());
 	                  this.isJumping = false;
 	                  this.navigator.clearPath();
@@ -567,7 +574,7 @@ public abstract class DefaultFriendEntity extends TradeableFriendEntity implemen
 	            return ActionResultType.SUCCESS;
 	         }
 			   
-		      if ((itemstack.getItem() != Items.NAME_TAG && Screen.func_231173_s_())) {
+		      if ((itemstack.getItem() != Items.NAME_TAG && Screen.hasShiftDown())) {
 		         if (player.isSpectator()) {
 		            return ActionResultType.SUCCESS;
 		         } else if (player.world.isRemote) {

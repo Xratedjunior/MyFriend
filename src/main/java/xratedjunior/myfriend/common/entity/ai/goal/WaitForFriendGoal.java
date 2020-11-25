@@ -20,6 +20,7 @@ public class WaitForFriendGoal extends Goal {
    /**
     * Returns whether an in-progress EntityAIBase should continue executing
     */
+   @Override
    public boolean shouldContinueExecuting() {
       return this.friendEntity.func_233685_eM_();
    }
@@ -28,12 +29,13 @@ public class WaitForFriendGoal extends Goal {
     * Returns whether execution should begin. You can also read and cache any state necessary for execution in this
     * method as well.
     */
+   @Override
    public boolean shouldExecute() {
       if (!this.friendEntity.isTamed()) {
          return false;
       } else if (this.friendEntity.isInWaterOrBubbleColumn()) {
          return false;
-      } else if (!this.friendEntity.func_233570_aj_()) {
+      } else if (!this.friendEntity.isOnGround()) {
          return false;
       } else {
          LivingEntity livingentity = this.friendEntity.getOwner();
@@ -48,21 +50,23 @@ public class WaitForFriendGoal extends Goal {
    /**
     * Execute a one shot task or start executing a continuous task
     */
+   @Override
    public void startExecuting() {
       this.friendEntity.getNavigator().clearPath();
       this.friendEntity.func_233686_v_(true);
       if(!this.friendEntity.world.isRemote && this.friendEntity.getOwner() instanceof ServerPlayerEntity) {
-          this.friendEntity.getOwner().sendMessage(new StringTextComponent(this.friendEntity.getDisplayName().getString() + ": I will wait here!."), Util.field_240973_b_);
+          this.friendEntity.getOwner().sendMessage(new StringTextComponent(this.friendEntity.getDisplayName().getString() + ": I will wait here!."), Util.DUMMY_UUID);
       }
    }
 
    /**
     * Reset the task's internal state. Called when this task is interrupted by another one
     */
+   @Override
    public void resetTask() {
       this.friendEntity.func_233686_v_(false);
       if(!this.friendEntity.world.isRemote && this.friendEntity.getOwner() instanceof ServerPlayerEntity) {
-    	  this.friendEntity.getOwner().sendMessage(new StringTextComponent(this.friendEntity.getDisplayName().getString() + ": Okay let's go!"), Util.field_240973_b_);
+    	  this.friendEntity.getOwner().sendMessage(new StringTextComponent(this.friendEntity.getDisplayName().getString() + ": Okay let's go!"), Util.DUMMY_UUID);
       }
    }
 }
